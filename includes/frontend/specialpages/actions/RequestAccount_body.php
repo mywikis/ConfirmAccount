@@ -17,6 +17,8 @@ class RequestAccountPage extends SpecialPage {
 	protected $mSrcName; // string
 	protected $mFileSize; // integer
 	protected $mTempPath; // string
+	
+	protected $mCaptchaId; // string (I think?)
 
 	function __construct() {
 		parent::__construct( 'RequestAccount' );
