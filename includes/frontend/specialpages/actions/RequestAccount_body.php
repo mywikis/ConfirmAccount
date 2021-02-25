@@ -27,7 +27,7 @@ class RequestAccountPage extends SpecialPage {
 	}
 
 	function execute( $par ) {
-		global $wgAccountRequestTypes;
+		global $wgAccountRequestTypes, $wgConfirmAccountCaptchas, $wgCaptchaClass, $wgCaptchaTriggers;
 
 		$reqUser = $this->getUser();
 		$request = $this->getRequest();
@@ -73,7 +73,11 @@ class RequestAccountPage extends SpecialPage {
 		}
 		# We may be confirming an email address here
 		$emailCode = $request->getText( 'wpEmailToken' );
-
+		# Captcha
+		if ( isset( $wgCaptchaClass ) ) {
+			// simple things, like QuestyCaptcha
+			$this->mCaptchaId = $request->getText( 'wpCaptchaId', '' );
+		}
 		$action = $request->getVal( 'action' );
 		if ( $request->wasPosted()
 			&& $reqUser->matchEditToken( $request->getVal( 'wpEditToken' ) ) ) {
