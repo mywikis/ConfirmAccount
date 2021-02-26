@@ -75,7 +75,7 @@ class AccountRequestSubmission {
 	 * @return array [ true or error key string, html error msg or null ]
 	 */
 	public function submit( IContextSource $context ) {
-		global $wgAccountRequestThrottle, $wgConfirmAccountRequestFormItems;
+		global $wgAccountRequestThrottle, $wgConfirmAccountRequestFormItems, $wgConfirmAccountCaptchas, $wgCaptchaClass, $wgCaptchaTriggers, $wgHCaptchaSecretKey;
 
 		$cache = ObjectCache::getLocalClusterInstance();
 		$formConfig = $wgConfirmAccountRequestFormItems; // convience
