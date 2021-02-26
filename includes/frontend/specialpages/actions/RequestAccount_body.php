@@ -79,10 +79,10 @@ class RequestAccountPage extends SpecialPage {
 		# Captcha
 		if ( isset( $wgCaptchaClass ) ) {
 			$captchaId = $request->getText( 'wpCaptchaId', '' ); // simple things, like QuestyCaptcha
-			$hCaptchaResponse = $request->getText( 'h-captcha-response', '' ); // hCaptcha
+			$hCaptchaResponse = $request->getVal( 'h-captcha-response' ); // hCaptcha
 			
 			$this->mCaptchaId = !empty( $captchaId ) ? $captchaId : '';
-			$this->mHCaptchaResponse = !empty( $hCaptchaResponse ) ? $hCaptchaResponse : '';
+			$this->mHCaptchaResponse = $hCaptchaResponse;
 		}
 		$action = $request->getVal( 'action' );
 		if ( $request->wasPosted()
