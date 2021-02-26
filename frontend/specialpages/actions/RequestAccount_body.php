@@ -17,6 +17,9 @@ class RequestAccountPage extends SpecialPage {
 	protected $mSrcName; // string
 	protected $mFileSize; // integer
 	protected $mTempPath; // string
+	
+	protected $mCaptchaId; // string
+	protected $mHCaptchaResponse; // string
 
 	function __construct() {
 		parent::__construct( 'RequestAccount' );
@@ -27,7 +30,7 @@ class RequestAccountPage extends SpecialPage {
 	}
 
 	function execute( $par ) {
-		global $wgAccountRequestTypes;
+		global $wgAccountRequestTypes, $wgConfirmAccountCaptchas, $wgCaptchaClass, $wgCaptchaTriggers;
 
 		$reqUser = $this->getUser();
 		$request = $this->getRequest();
@@ -73,7 +76,14 @@ class RequestAccountPage extends SpecialPage {
 		}
 		# We may be confirming an email address here
 		$emailCode = $request->getText( 'wpEmailToken' );
-
+		# Captcha
+		if ( isset( $wgCaptchaClass ) ) {
+			$captchaId = $request->getText( 'wpCaptchaId', '' ); // simple things, like QuestyCaptcha
+			$hCaptchaResponse = $request->getText( 'h-captcha-response', '' ); // hCaptcha
+			
+			$this->mCaptchaId = !empty( $captchaId ) ? $captchaId : '';
+			$this->mHCaptchaResponse = !empty( $hCaptchaResponse ) ? $hCaptchaResponse : '';
+		}
 		$action = $request->getVal( 'action' );
 		if ( $request->wasPosted()
 			&& $reqUser->matchEditToken( $request->getVal( 'wpEditToken' ) ) ) {
@@ -334,7 +344,9 @@ class RequestAccountPage extends SpecialPage {
 				'attachmentSrcName'         => $this->mSrcName,
 				'attachmentDidNotForget'    => $this->mForgotAttachment, // confusing name :)
 				'attachmentSize'            => $this->mFileSize,
-				'attachmentTempPath'        => $this->mTempPath
+				'attachmentTempPath'        => $this->mTempPath,
+				'captchaId'                 => $this->mCaptchaId,
+				'hCaptchaResponse'          => $this->mHCaptchaResponse
 			]
 		);
 
