@@ -27,6 +27,9 @@ class AccountRequestSubmission {
 	protected $attachmentDidNotForget; // user already saw "please re-attach" notice
 	protected $attachmentSize; // bytes size of file
 	protected $attachmentTempPath; // tmp path file was uploaded to FS
+	/* Captcha */
+	protected $captchaId;
+	protected $hCaptchaResponse;
 
 	public function __construct( User $requester, array $params ) {
 		$this->requester = $requester;
@@ -48,6 +51,8 @@ class AccountRequestSubmission {
 		$this->attachmentDidNotForget = $params['attachmentDidNotForget'];
 		$this->attachmentSize = $params['attachmentSize'];
 		$this->attachmentTempPath = $params['attachmentTempPath'];
+		$this->captchaId = $params['captchaId'];
+		$this->hCaptchaResponse = $params['hCaptchaResponse'];
 	}
 
 	/**
@@ -85,6 +90,29 @@ class AccountRequestSubmission {
 			];
 		} elseif ( wfReadOnly() ) {
 			return [ 'accountreq_readonly', $context->msg( 'badaccess-group0' )->escaped() ];
+		}
+		
+		# Check for captcha validity
+		if ( $wgCaptchaClass === 'hCaptcha' ) {
+			// TODO FIXME: The following temporary patch is basically giving up on ConfirmEdit's implementation
+			// and doing it ourselves in a really bad way, so replace it whenever possible
+			// Taken directly from hCaptcha's implementation: https://medium.com/@hCaptcha/using-hcaptcha-with-php-fc31884aa9ea
+			$data = array(
+			    'secret' => $wgHCaptchaSecretKey,
+			    'response' => $hCaptchaResponse
+			);
+			$verify = curl_init();
+			curl_setopt($verify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
+			curl_setopt($verify, CURLOPT_POST, true);
+			curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($data));
+			curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
+			$response = curl_exec($verify);
+			
+			$responseData = json_decode($response);
+			if (!$responseData->success) {
+			    return [ false, 'Captcha incorrect' ];
+			}
+			// End temporary patch
 		}
 
 		# Now create a dummy user ($u) and check if it is valid
