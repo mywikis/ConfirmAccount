@@ -95,13 +95,13 @@ class AccountRequestSubmission {
 		}
 		
 		# Check for captcha validity
-		if ( $wgCaptchaClass === 'hCaptcha' ) {
+		if ( strpos( strtolower( $wgCaptchaClass ), 'hcaptcha' ) !== false ) {
 			// TODO FIXME: The following temporary patch is basically giving up on ConfirmEdit's implementation
 			// and doing it ourselves in a really bad way, so replace it whenever possible
 			// Taken directly from hCaptcha's implementation: https://medium.com/@hCaptcha/using-hcaptcha-with-php-fc31884aa9ea
 			$data = array(
 			    'secret' => $wgHCaptchaSecretKey,
-			    'response' => $hCaptchaResponse
+			    'response' => $this->hCaptchaResponse
 			);
 			$verify = curl_init();
 			curl_setopt($verify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
@@ -112,11 +112,9 @@ class AccountRequestSubmission {
 			
 			$responseData = json_decode($response);
 			if (!$responseData->success) {
-			    return [ false, 'Captcha incorrect' ];
+			    return [ false, 'Captcha incorrect - please leave this page and come back to try again' ];
 			}
 			// End temporary patch
-		} elseif ( $wgCaptchaClass === 'QuestyCaptcha' ) {
-			// do something here
 		}
 
 		# Now create a dummy user ($u) and check if it is valid
