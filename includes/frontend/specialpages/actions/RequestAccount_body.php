@@ -18,7 +18,8 @@ class RequestAccountPage extends SpecialPage {
 	protected $mFileSize; // integer
 	protected $mTempPath; // string
 	
-	protected $mCaptchaId; // string (I think?)
+	protected $mCaptchaId; // string
+	protected $mHCaptchaResponse; // string
 
 	function __construct() {
 		parent::__construct( 'RequestAccount' );
@@ -77,8 +78,11 @@ class RequestAccountPage extends SpecialPage {
 		$emailCode = $request->getText( 'wpEmailToken' );
 		# Captcha
 		if ( isset( $wgCaptchaClass ) ) {
-			// simple things, like QuestyCaptcha
-			$this->mCaptchaId = $request->getText( 'wpCaptchaId', '' );
+			$captchaId = $request->getText( 'wpCaptchaId', '' ); // simple things, like QuestyCaptcha
+			$hCaptchaResponse = $request->getText( 'h-captcha-response', '' ); // hCaptcha
+			
+			$this->mCaptchaId = !empty( $captchaId ) ? $captchaId : '';
+			$this->mHCaptchaResponse = !empty( $hCaptchaResponse ) ? $hCaptchaResponse : '';
 		}
 		$action = $request->getVal( 'action' );
 		if ( $request->wasPosted()
@@ -341,7 +345,9 @@ class RequestAccountPage extends SpecialPage {
 				'attachmentSrcName'         => $this->mSrcName,
 				'attachmentDidNotForget'    => $this->mForgotAttachment, // confusing name :)
 				'attachmentSize'            => $this->mFileSize,
-				'attachmentTempPath'        => $this->mTempPath
+				'attachmentTempPath'        => $this->mTempPath,
+				'captchaId'                 => $this->mCaptchaId,
+				'hCaptchaResponse'          => $this->mHCaptchaResponse
 			]
 		);
 
