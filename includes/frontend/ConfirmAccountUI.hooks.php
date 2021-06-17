@@ -27,8 +27,9 @@ class ConfirmAccountUIHooks {
 	public static function setRequestLoginLinks(
 		array &$personal_urls, Title $title, SkinTemplate $skin
 	) {
-		# Add a link to Special:RequestAccount if a link exists for login
-		if ( isset( $personal_urls['login'] ) ) {
+		# Add a link to Special:RequestAccount if a link doesn't exist for logout
+		# This is because isset($personal_urls['login']) || isset($personal_urls['anonlogin']) doesn't cut it for some reason in MW 1.35
+		if ( !isset( $personal_urls['logout'] ) ) {
 			$personal_urls['createaccount'] = [
 				'text' => wfMessage( 'requestaccount-login' )->text(),
 				'href' => SpecialPage::getTitleFor( 'RequestAccount' )->getLocalUrl()
